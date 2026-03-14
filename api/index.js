@@ -1,7 +1,7 @@
 // NWC Bridge - HTTP GET endpoint for Lightning payments via Nostr Wallet Connect
 // All credentials are passed as URL parameters (designed for AI agent use)
+// Node 18+: uses native WebSocket (no polyfill needed for Vercel)
 
-import "websocket-polyfill";
 import { NWCClient } from "@getalby/sdk/nwc";
 
 /**
@@ -42,7 +42,7 @@ function json(res, statusCode, data) {
 const routes = {
   // GET /balance?nwc=<url>
   // Returns balance of the wallet in sats
-  "/balance": async (query, res) => {
+  "/balance": async (query) => {
     const nwcUrl = parseNWC(query.nwc);
     const result = await withNWC(nwcUrl, (client) => client.getBalance());
     return { balance_msats: result.balance, balance_sats: Math.floor(result.balance / 1000) };
@@ -50,7 +50,7 @@ const routes = {
 
   // GET /pay?from_nwc=<url>&invoice=<bolt11>
   // Pay a BOLT11 invoice from the "from" wallet
-  "/pay": async (query, res) => {
+  "/pay": async (query) => {
     const fromUrl = parseNWC(query.from_nwc);
     const { invoice } = query;
     if (!invoice) throw new Error("Missing invoice parameter");
